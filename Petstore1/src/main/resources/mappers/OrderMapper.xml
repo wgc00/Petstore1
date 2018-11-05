@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wgc.petstore.dao.OrderMapper">
+  <resultMap id="BaseResultMap" type="com.wgc.petstore.entity.Order" autoMapping="true">
+    <result column="pet_id" jdbcType="INTEGER" property="petId" />
+   <!-- <id column="order_id" jdbcType="INTEGER" property="orderId" />
+    <result column="order_number" jdbcType="VARCHAR" property="orderNumber" />
+    <result column="order_quantity" jdbcType="INTEGER" property="orderQuantity" />
+    <result column="order_ship_date" jdbcType="TIMESTAMP" property="orderShipDate" />
+    <result column="order_status"  property="orderStatus" />
+    <result column="order_complete" jdbcType="BIT" property="orderComplete" />-->
+    <association property="pet" resultMap="PetResultMap"></association>
+  </resultMap>
+  <resultMap id="PetResultMap" type="com.wgc.petstore.entity.Pet" autoMapping="true">
+    <collection property="order" ofType="com.wgc.petstore.entity.Order" resultMap="BaseResultMap"></collection>
+   <!-- <association property="tag" resultMap="TagResultMap"></association>-->
+  </resultMap>
+
+<!--  <resultMap id="TagResultMap" type="com.wgc.petstore.entity.Tag" autoMapping="true">
+    <collection property="pet" ofType="com.wgc.petstore.entity.Pet" resultMap="BaseResultMap"></collection>
+  </resultMap>-->
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from `order`
+    where order_id = #{orderId,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.wgc.petstore.entity.Order">
+    insert into `order` (order_id, order_number, pet_id,
+      order_quantity, order_ship_date, order_status, 
+      order_complete)
+    values (#{orderId,jdbcType=INTEGER}, #{orderNumber,jdbcType=VARCHAR}, #{petId,jdbcType=INTEGER}, 
+      #{orderQuantity,jdbcType=INTEGER}, #{orderShipDate,jdbcType=TIMESTAMP}, #{orderStatus},
+      #{orderComplete,jdbcType=BIT})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.wgc.petstore.entity.Order">
+    update `order`
+    set order_number = #{orderNumber,jdbcType=VARCHAR},
+      pet_id = #{petId,jdbcType=INTEGER},
+      order_quantity = #{orderQuantity,jdbcType=INTEGER},
+      order_ship_date = #{orderShipDate,jdbcType=TIMESTAMP},
+      order_status = #{orderStatus},
+      order_complete = #{orderComplete,jdbcType=BIT}
+    where order_id = #{orderId,jdbcType=INTEGER}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select order_id, order_number, pet_id, order_quantity, order_ship_date, order_status, 
+    order_complete
+    from `order`
+    where order_id = #{orderId,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select order_id, order_number, pet_id, order_quantity, order_ship_date, order_status, 
+    order_complete
+    from `order`
+  </select>
+  <select id="selectByNumber" resultType="com.wgc.petstore.entity.Order">
+      select
+        o.order_number,
+        o.order_quantity,
+        o.order_ship_date,
+        o.order_status,
+        o.order_complete,
+        p.pet_name,
+        p.pet_status,
+        p.tas_id
+      from `order` o left join  pet p  on o.pet_id = p.pet_id
+
+  </select>
+</mapper>

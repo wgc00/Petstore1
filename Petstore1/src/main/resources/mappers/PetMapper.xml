@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wgc.petstore.dao.PetMapper">
+    <resultMap id="BaseResultMap" type="com.wgc.petstore.entity.Pet" autoMapping="true">
+        <!--  <id column="pet_id" jdbcType="INTEGER" property="petId"  />
+          <result column="category_id" jdbcType="INTEGER" property="categoryId" />
+          <result column="pet_name" jdbcType="VARCHAR" property="petName" />
+          <result column="tas_id" jdbcType="INTEGER" property="tasId" />
+          <result column="pet_status" property="petStatus" />-->
+        <association property="tag" resultMap="TagResultMap"></association>
+        <association property="category" resultMap="CategoryResultMap"></association>
+        <association property="inventory" resultMap="InventoryResultMap"></association>
+        <association property="photo" resultMap="PhotoResultMap"></association>
+    </resultMap>
+    <resultMap id="TagResultMap" type="com.wgc.petstore.entity.Tag" autoMapping="true">
+        <collection property="pet" ofType="com.wgc.petstore.entity.Pet"></collection>
+    </resultMap>
+    <resultMap id="CategoryResultMap" type="com.wgc.petstore.entity.Category" autoMapping="true">
+        <collection property="categoryId" ofType="com.wgc.petstore.entity.Pet"></collection>
+
+    </resultMap>
+    <resultMap id="InventoryResultMap" type="com.wgc.petstore.entity.Inventory" autoMapping="true">
+        <collection property="pet" ofType="com.wgc.petstore.entity.Pet"></collection>
+    </resultMap>
+
+    <resultMap id="PhotoResultMap" type="com.wgc.petstore.entity.Photo" autoMapping="true">
+        <collection property="petId" ofType="com.wgc.petstore.entity.Pet"></collection>
+    </resultMap>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete from pet
+        where pet_id = #{petId,jdbcType=INTEGER}
+  </delete>
+    <insert id="insert" parameterType="com.wgc.petstore.entity.Pet">
+    insert into pet (pet_id, category_id, pet_name, 
+      tas_id, pet_status)
+    values (#{petId,jdbcType=INTEGER}, #{categoryId,jdbcType=INTEGER}, #{petName,jdbcType=VARCHAR}, 
+      #{tasId,jdbcType=INTEGER}, #{petStatus})
+  </insert>
+    <update id="updateByPrimaryKey" parameterType="com.wgc.petstore.entity.Pet">
+    update pet
+    set category_id = #{categoryId,jdbcType=INTEGER},
+      pet_name = #{petName,jdbcType=VARCHAR},
+      tas_id = #{tasId,jdbcType=INTEGER},
+      pet_status = #{petStatus}
+    where pet_id = #{petId,jdbcType=INTEGER}
+  </update>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select pet_id, category_id, pet_name, tas_id, pet_status
+    from pet
+    where pet_id = #{petId,jdbcType=INTEGER}
+  </select>
+    <sql id="selectAll1">
+        select
+           p.pet_name,
+           p.pet_status,
+           t.*,
+           c.*,
+           i.*,
+           p2.*
+        from Pet p
+        left join  Tag T on p.tas_id = T.tag_id
+        left join Category c on p.category_id = c.category_id
+        left join inventory i on p.pet_id = i.pet_id
+        left join  photo p2  on p.pet_id = p2.pet_id
+    </sql>
+    <select id="selectAll" resultMap="BaseResultMap">
+   /* select pet_id, category_id, pet_name, tas_id, pet_status
+    from pet*/
+   <include refid="selectAll1"/>
+  </select>
+    <select id="selectTagName" resultMap="BaseResultMap" >
+        <include refid="selectAll1"/>
+        where  p.pet_name like #{name} or t.tag_name like #{name}
+        or c.category_name like #{name}
+    </select>
+    <select id="selectName" resultMap="BaseResultMap">
+        <include refid="selectAll1"/> where p.pet_name = #{name}
+    </select>
+
+    <insert id="batchAdd" parameterType="com.wgc.petstore.entity.Pet">
+        insert into pet(category_id, pet_name, tas_id, pet_status)
+        value (#{category.categoryId}, #{petName}, #{tasId}, #{petStatus})
+    </insert>
+</mapper>
